@@ -1,6 +1,7 @@
 import sys
 import math
 
+print("----------------------------------------\n-Práctica de Paradigmas de Programación-\n----------------------------------------")
 print("\n1. CREAR NUEVO TABLERO\n2. LEER TABLERO DE FICHERO\n3. SALIR")
 
 teclado=int(input("\nIndique la opción: "))
