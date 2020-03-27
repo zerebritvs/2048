@@ -1,33 +1,32 @@
 import sys
 import random
-#coding: UTF8
+
+
+# coding: UTF8
 
 class Celda:  # creamos el objeto celda
 
-        def __init__(self):
+    def __init__(self):
+        '''Inicialiazmos las propiedades del objeto celda'''
 
-            '''Inicialiazmos las propiedades del objeto celda'''
+        self.__valor = " "
 
-            self.__valor = " "
+    def getValor(self):
+        '''Obtenemos la propiedad valor del objeto'''
 
-        def getValor(self):
+        return self.__valor
 
-            '''Obtenemos la propiedad valor del objeto'''
+    def setValor(self, valor):
+        '''Fijamos la propiedad'''
 
-            return self.__valor
+        self.__valor = valor
 
-
-        def setValor(self, valor):
-
-            '''Fijamos la propiedad'''
-
-            self.__valor = valor
 
 def menu():
-
     '''Te reenvia al menu principal'''
 
-    print("----------------------------------------\n-Práctica de Paradigmas de Programación-\n----------------------------------------")
+    print(
+        "----------------------------------------\n-Práctica de Paradigmas de Programación-\n----------------------------------------")
     print("\n1. CREAR NUEVO TABLERO\n2. LEER TABLERO DE FICHERO\n3. SALIR")
 
     select = int(input("\nSelecione una opción: "))
@@ -36,9 +35,7 @@ def menu():
     return select
 
 
-
-def ImprimirTab(tam,modo,celdas):
-
+def ImprimirTab(tam, modo, celdas):
     '''Imprime en consola el tablero vacio'''
 
     for i in range(tam):
@@ -55,32 +52,30 @@ def ImprimirTab(tam,modo,celdas):
         print("|")
     print("+", end="")
     for j in range(tam):
-        for k in range (modo):
+        for k in range(modo):
             print("-", end="")
         print("+", end="")
 
 
 def randInt(max):
     '''Genera un int random generico'''
-    rand = int(random.random()*max)
+    rand = int(random.random() * max)
     return rand
 
-def initCelda(tam,obs):
 
+def initCelda(tam, obs):
     '''Inicializamos las celdas del tablero'''
 
-    celdas = [[Celda() for i in range(tam)]for j in range(tam)]
+    celdas = [[Celda() for i in range(tam)] for j in range(tam)]
 
     cont = 0
-    for i in range(obs): #Creamos los obstaculos
+    for i in range(obs):  # Creamos los obstaculos
 
         while cont <= i:
             randIntX = randInt(tam)
             randIntY = randInt(tam)
 
-
             if celdas[randIntX][randIntY].getValor() == " ":
-
                 celdas[randIntX][randIntY].setValor("*")
                 cont += 1
 
@@ -91,7 +86,6 @@ def initCelda(tam,obs):
             randInt1 = randInt(tam)
             randInt2 = randInt(tam)
 
-
             if celdas[randInt1][randInt2].getValor() == " ":
                 celdas[randInt1][randInt2].setValor("1")
                 contNum += 1
@@ -99,23 +93,56 @@ def initCelda(tam,obs):
     return celdas
 
 
-def derecha(tam):
+def derecha(tam,celdas):
     print("\n---Derecha---")
+    for k in range(tam):
+        for i in range(tam):
+            for j in range(tam-1, 0, -1):
+                if celdas[j][i].getValor() == " ":
+                    if celdas[j-1][i].getValor() != "*":
+                        celdas[j][i].setValor(celdas[j - 1][i].getValor())   #mueve lo que hay en tam-1 a tam
+                        celdas[j-1][i].setValor(" ")    #borra el valor anterior
+                #elif celdas[j][i].getValor() == "1"
+    return celdas
 
-    long = tam
+def izquierda(tam,celdas):
+    print("\n---Izquierda---")
+    for k in range(tam):
+        for i in range(tam):
+            for j in range(0, tam-1, 1):
+                if celdas[j][i].getValor() == " ":
+                    if celdas[j + 1][i].getValor() != "*":
+                        celdas[j][i].setValor(celdas[j + 1][i].getValor())  # mueve lo que hay en tam-1 a tam
+                        celdas[j + 1][i].setValor(" ")
+    return celdas
 
-    for i in range(tam):
-        if celdas[tam][i+1].getValor() != " ":
-            celdas[tam+1][i]
+def subir(tam,celdas):
+    print("\n---Subir---")
+    for k in range(tam):
+        for i in range(0, tam-1, 1):
+            for j in range(tam):
+                if celdas[j][i].getValor() == " ":
+                    if celdas[j][i+1].getValor() != "*":
+                        celdas[j][i].setValor(celdas[j][i+1].getValor())  # mueve lo que hay en tam-1 a tam
+                        celdas[j][i+1].setValor(" ")
+    return celdas
 
 
-
-
+def bajar(tam,celdas):
+    print("\n---Bajar---")
+    for k in range(tam):
+        for i in range(tam-1, 0, -1):
+            for j in range(tam):
+                if celdas[j][i].getValor() == " ":
+                    if celdas[j][i-1].getValor() != "*":
+                        celdas[j][i].setValor(celdas[j][i-1].getValor())  # mueve lo que hay en tam-1 a tam
+                        celdas[j][i-1].setValor(" ")
+    return celdas
 
 
 
 modo = 1
-opcion = menu()  #llamo a la función menu porque necesito la variable select
+opcion = menu()  # llamo a la función menu porque necesito la variable select
 while True:
 
     if opcion == 1:
@@ -124,13 +151,17 @@ while True:
         obs = int(input("Número de obstáculos: "))
         celdas = initCelda(tam, obs)
 
+
         while True:
 
+
             ImprimirTab(tam, modo, celdas)
-            print("\n\nMOVIMIENTOS:  | PUNTUACIÓN: ")
+            move = 0
+            score = 0
+            print("\n\nMOVIMIENTOS:", move,  "| PUNTUACIÓN:", score)
             letra = input("[S]ubir, [B]ajar, [I]zda, [D]cha | [M]odo, [G]uardar, [F]in: ")
             if letra == "M":
-                print("\nMODOS DE VISUALIZACION: \n")
+                print("\nMODOS DE VISUALIZACIÓN: \n")
                 print("1.Alfabético\n2.Numérico\n3.1024\n4.2048")
 
                 modo = int(input("\nEscoja modo: "))
@@ -143,30 +174,19 @@ while True:
                 menu()
                 break
             elif letra == "S":  # mueve hacia arriba
-                pass
+                celdas = subir(tam, celdas)
+                move = move + 1
             elif letra == "B":  # mueve hacia abajo
-                pass
+                celdas = bajar(tam, celdas)
+                move = move + 1
             elif letra == "I":  # mueve hacia la izquierda
-                pass
+                celdas = izquierda(tam, celdas)
+                move = move + 1
             elif letra == "D":  # mueve hacia la derecha
-                derecha(tam)
+                celdas = derecha(tam, celdas)
+                move = move + 1
 
 
     elif opcion == 2:  # carga una partida guardada
         fichero = input("Nombre del fichero: ")
         break
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
