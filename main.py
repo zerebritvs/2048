@@ -2,7 +2,6 @@ import sys
 import random
 from io import open
 
-
 # coding: UTF8
 
 class Celda:  # creamos el objeto celda
@@ -83,17 +82,21 @@ def menu():
     '''Te reenvia al menu principal'''
 
     print(
-        "----------------------------------------\n-Práctica de Paradigmas de Programación-\n----------------------------------------")
+        "--------------------  CLON-3  --------------------\n- Práctica de Paradigmas de Programación 2019-20 -\n--------------------------------------------------")
     print("\n1. CREAR NUEVO TABLERO\n2. LEER TABLERO DE FICHERO\n3. SALIR")
 
     select = int(input("\nSelecione una opción: "))
     if select == 3:
         sys.exit(0)
+
     return select
 
 
 def ImprimirTab(tam, modo, celdas):
     '''Imprime en consola el tablero vacio'''
+
+    if modo == 3:
+        modo = 4
 
     for i in range(tam):
         print("+", end="")
@@ -119,11 +122,12 @@ def save(tam, celdas):
 
     fichero = input("Nombre del fichero: ")
     f = open(fichero, "w")
-    f.write(str(move) + "\n" + str(score))
+    f.write(str(moves) + "\n" + str(score))
 
     for i in range(tam):
         f.write("\n")
         for j in range(tam):
+            celdas[j][i].setMode(1)
             if celdas[j][i].getValor() == " ":
                f.write(".")
             else:
@@ -131,13 +135,67 @@ def save(tam, celdas):
 
     f.close()
 
+def load():
+    '''Carga el tablero de un archivo .tab'''
 
+    fichero = input("Nombre del fichero: ")
+    f = open(fichero, "r")
+
+    moves = f.read(0)
+    #print(move)
+    f.seek(1)
+    score = f.read(1)
+    #print(score)
+    f.seek(2)
+
+    # for i in range(tam):
+    #     for j in range(tam):
+    #           if f.read() == ".":
+    #             celdas[j][i].setValor(" ")
+    #           else:
+    #              f.read() = celdas[j][i].setValor()
+
+    f.close()
+
+def addCelda(tam, celdas):
+    '''Añade un bloque nuevo de distinto nivel(1 o 2) cada vez que hay movimiento'''
+
+    r = random.choices([1, 2], [0.75, 0.25])#probabilidad del 0.75% de nivel 1 y 0.25% de nivel 2
+    cont = 0
+
+    while True:
+        randIntX = randInt(tam)
+        randIntY = randInt(tam)
+
+        if celdas[randIntX][randIntY].getValor() == " ":
+            celdas[randIntX][randIntY].setValor(r[0])
+            break
+
+    return celdas
 
 
 def randInt(max):
     '''Genera un int random generico'''
     rand = int(random.random() * max)
     return rand
+
+def fin(tam, celdas):
+    '''Comprueba si la partida a finalizado'''
+
+    maximo = tam * tam
+    contmax = 0
+
+    for i in range(tam):
+        for j in range(tam):
+            if celdas[j][i].getValor() != " ":  #comprueba si todas las celdas están llenas
+                contmax += 1
+
+    if contmax == maximo:
+        ImprimirTab(tam, modo, celdas)
+        print("\n\n---  FIN DEL JUEGO ---\n")
+        menu()
+
+
 
 
 def initCelda(tam, obs):
@@ -158,19 +216,13 @@ def initCelda(tam, obs):
 
     contNum = 0
     for i in range(2):
+        addCelda(tam, celdas)
 
-        while contNum <= i:
-            randInt1 = randInt(tam)
-            randInt2 = randInt(tam)
-
-            if celdas[randInt1][randInt2].getValor() == " ":
-                celdas[randInt1][randInt2].setValor(1)
-                contNum += 1
 
     return celdas
 
 
-def derecha(tam,celdas):
+def derecha(tam, celdas, score):
     print("\n---Derecha---")
     for k in range(tam):
         for i in range(tam):
@@ -179,10 +231,13 @@ def derecha(tam,celdas):
                     if celdas[j-1][i].getValor() != "*":
                         celdas[j][i].setValor(celdas[j - 1][i].getValor())   #mueve lo que hay en tam-1 a tam
                         celdas[j-1][i].setValor(" ")    #borra el valor anterior
-                #elif celdas[j][i].getValor() == "1"
+                elif celdas[j][i].getValor() == celdas[j-1][i].getValor() and celdas[j][i].getValor() != "*":
+                        celdas[j][i].setValor(celdas[j][i].getValor()+1)
+                        celdas[j - 1][i].setValor(" ")
+                        score += 1
     return celdas
 
-def izquierda(tam,celdas):
+def izquierda(tam, celdas, score):
     print("\n---Izquierda---")
     for k in range(tam):
         for i in range(tam):
@@ -191,9 +246,13 @@ def izquierda(tam,celdas):
                     if celdas[j + 1][i].getValor() != "*":
                         celdas[j][i].setValor(celdas[j + 1][i].getValor())  # mueve lo que hay en tam-1 a tam
                         celdas[j + 1][i].setValor(" ")
+                elif celdas[j][i].getValor() == celdas[j+1][i].getValor() and celdas[j][i].getValor() != "*":
+                        celdas[j][i].setValor(celdas[j][i].getValor()+1)
+                        celdas[j + 1][i].setValor(" ")
+                        score += 1
     return celdas
 
-def subir(tam,celdas):
+def subir(tam, celdas, score):
     print("\n---Subir---")
     for k in range(tam):
         for i in range(0, tam-1, 1):
@@ -202,10 +261,14 @@ def subir(tam,celdas):
                     if celdas[j][i+1].getValor() != "*":
                         celdas[j][i].setValor(celdas[j][i+1].getValor())  # mueve lo que hay en tam-1 a tam
                         celdas[j][i+1].setValor(" ")
+                elif celdas[j][i].getValor() == celdas[j][i+1].getValor() and celdas[j][i].getValor() != "*":
+                        celdas[j][i].setValor(celdas[j][i].getValor()+1)
+                        celdas[j][i+1].setValor(" ")
+                        score += 1
     return celdas
 
 
-def bajar(tam,celdas):
+def bajar(tam, celdas, score):
     print("\n---Bajar---")
     for k in range(tam):
         for i in range(tam-1, 0, -1):
@@ -214,6 +277,10 @@ def bajar(tam,celdas):
                     if celdas[j][i-1].getValor() != "*":
                         celdas[j][i].setValor(celdas[j][i-1].getValor())  # mueve lo que hay en tam-1 a tam
                         celdas[j][i-1].setValor(" ")
+                elif celdas[j][i].getValor() == celdas[j][i-1].getValor() and celdas[j][i].getValor() != "*":
+                        celdas[j][i].setValor(celdas[j][i].getValor()+1)
+                        celdas[j][i - 1].setValor(" ")
+                        score += 1
     return celdas
 
 
@@ -227,14 +294,15 @@ while True:
         tam = int(input("Tamaño del tablero: "))
         obs = int(input("Número de obstáculos: "))
         celdas = initCelda(tam, obs)
-        move = 0
+        moves = 0
         score = 0
 
         while True:
 
+            fin(tam, celdas)
             ImprimirTab(tam, modo, celdas)
 
-            print("\n\nMOVIMIENTOS:", move,  "| PUNTUACIÓN:", score)
+            print("\n\nMOVIMIENTOS:", moves,  "| PUNTUACIÓN:", score)
             letra = input("[S]ubir, [B]ajar, [I]zda, [D]cha | [M]odo, [G]uardar, [F]in: ")
             if letra == "M":
                 print("\nMODOS DE VISUALIZACIÓN: \n")
@@ -254,29 +322,29 @@ while True:
                 menu()
                 break
             elif letra == "S":  # mueve hacia arriba
-                move += 1
-                celdas = subir(tam, celdas)
+                moves += 1
+                celdas = subir(tam, celdas, score)
+                addCelda(tam, celdas)
 
             elif letra == "B":  # mueve hacia abajo
-                move += 1
-                celdas = bajar(tam, celdas)
+                moves += 1
+                celdas = bajar(tam, celdas, score)
+                addCelda(tam, celdas)
 
             elif letra == "I":  # mueve hacia la izquierda
-                move += 1
-                celdas = izquierda(tam, celdas)
+                moves += 1
+                celdas = izquierda(tam, celdas, score)
+                addCelda(tam, celdas)
 
             elif letra == "D":  # mueve hacia la derecha
-                move += 1
-                celdas = derecha(tam, celdas)
+                moves += 1
+                celdas = derecha(tam, celdas, score)
+                addCelda(tam, celdas)
 
 
 
     elif opcion == 2:  # carga una partida guardada
-        fichero = input("Nombre del fichero: ")
-        f = open(fichero, "r")
-        partida = f.read()
-        print(partida)
-        f.close()
-        break
+        load()
+
 
 
