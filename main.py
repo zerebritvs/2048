@@ -14,6 +14,19 @@ class Celda:                                                # Creamos el objeto 
         self.__valor = " "
         self.__modo = 1
         self.__modoValor = " "
+        self.__lock = False
+
+    '''Obtenemos la propiedad lock del objeto'''
+
+    def getLock(self):
+
+        return self.__lock
+
+    '''Fijamos la propiedad lock'''
+
+    def setLock(self, lock):
+
+        self.__lock = lock
 
     '''Obtenemos la propiedad valor del objeto'''
 
@@ -21,17 +34,17 @@ class Celda:                                                # Creamos el objeto 
 
         return self.__valor
 
-    '''Fijamos el modo que esta seleccionado'''
-
-    def setMode(self, modo):
-
-        self.__modo = modo
-
     '''Fijamos la propiedad'''
 
     def setValor(self, valor):
 
         self.__valor = valor
+
+    '''Fijamos el modo que esta seleccionado'''
+
+    def setMode(self, modo):
+
+        self.__modo = modo
 
     '''Cambiamos al modo que queramos'''
 
@@ -41,51 +54,52 @@ class Celda:                                                # Creamos el objeto 
 
         if self.__modo == 1:
             if self.__valor == "*":
-                self.__modoValor = "*"
+                self.__modoValor = "*"                          # Obstaculos para modo 1
             elif self.__valor == " ":
-                self.__modoValor = " "
+                self.__modoValor = " "                          # Celdas vacias para modo 1
             else:
-                self.__modoValor = dic1[self.__valor]
+                self.__modoValor = dic1[self.__valor]           # Bloques para modo 1
             return self.__modoValor
 
         dic2 = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11}
 
         if self.__modo == 2:
             if self.__valor == "*":
-                self.__modoValor = "**"
+                self.__modoValor = "**"                         # Obstaculos para modo 2
             elif self.__valor == " ":
-                self.__modoValor = " "
+                self.__modoValor = " "                          # Celdas vacias para modo 2
             else:
-                self.__modoValor = dic2[self.__valor]
+                self.__modoValor = dic2[self.__valor]           # Bloques para modo 2
             return self.__modoValor
 
         dic3 = {1: 1, 2: 2, 3: 4, 4: 8, 5: 16, 6: 32, 7: 64, 8: 128, 9: 256, 10: 512, 11: 1024}
 
         if self.__modo == 3:
             if self.__valor == "*":
-                self.__modoValor = "****"
+                self.__modoValor = "****"                       # Obstaculos para modo 3
             elif self.__valor == " ":
-                self.__modoValor = " "
+                self.__modoValor = " "                          # Celdas vacias para modo 3
             else:
-                self.__modoValor = dic3[self.__valor]
+                self.__modoValor = dic3[self.__valor]           # Bloques para modo 3
             return self.__modoValor
 
         dic4 = {1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64, 7: 128, 8: 256, 9: 512, 10: 1024, 11: 2048}
 
         if self.__modo == 4:
             if self.__valor == "*":
-                self.__modoValor = "****"
+                self.__modoValor = "****"                       # Obstaculos para modo 4
             elif self.__valor == " ":
-                self.__modoValor = " "
+                self.__modoValor = " "                          # Celdas vacias para modo 4
             else:
-                self.__modoValor = dic4[self.__valor]
+                self.__modoValor = dic4[self.__valor]           # Bloques para modo 4
             return self.__modoValor
 
 
-'''Te reenvia al menu principal'''
+'''Te envia al menu principal'''
 
 
 def menu():
+
     print("--------------------  CLON-3  --------------------\n- Practica de Paradigmas de Programacion 2019-20 ",
           end="")
     print("-\n--------------------------------------------------")
@@ -190,6 +204,10 @@ def addCelda(tam, celdas):
             celdas[randIntX][randIntY].setValor(prob[0])
             break
 
+    for i in range(tam):
+        for j in range(tam):
+            celdas[j][i].setLock(False)
+
     return celdas
 
 
@@ -224,6 +242,7 @@ def fin(tam, celdas):
 
 
 def initCelda(tam, obs):
+
     celdas = [[Celda() for i in range(tam)] for j in range(tam)]    # Crea la lista celdas
 
     cont = 0
@@ -248,24 +267,21 @@ def initCelda(tam, obs):
 
 def derecha(tam, celdas, score):
 
-    print("\n--- Derecha ---")
-    contFusion = 0
+    print("\n--- DERECHA ---")
 
     for k in range(tam):
         for i in range(tam):
-
             for j in range(tam - 1, 0, -1):
-
-                if celdas[j][i].getValor() == " ":
-                    if celdas[j - 1][i].getValor() != "*":
-                        celdas[j][i].setValor(celdas[j - 1][i].getValor())                                          # Mueve lo que hay en tam-1 a tam
-                        celdas[j - 1][i].setValor(" ")                                                              # Borra el valor anterior
+                if celdas[j][i].getValor() == " ":                          # Comprueba si es espacio
+                    if celdas[j - 1][i].getValor() != "*":                  # Comprueba si no es obstaculo
+                        celdas[j][i].setValor(celdas[j - 1][i].getValor())  # Mueve lo que hay en tam-1 a tam
+                        celdas[j - 1][i].setValor(" ")                      # Borra el valor anterior
                 elif celdas[j][i].getValor() == celdas[j - 1][i].getValor() and celdas[j][i].getValor() != "*":
-                    if contFusion == 0:
-                        celdas[j][i].setValor(celdas[j][i].getValor() + 1)                                          # Fusiona dos celdas del mismo nivel
-                        celdas[j - 1][i].setValor(" ")
-                        contFusion += 1
-                        score += 1                                                                                  # Suma uno cada vez que fusiona
+                    if not celdas[j-1][i].getLock():
+                        celdas[j][i].setValor(celdas[j][i].getValor() + 1)  # Fusiona dos celdas del mismo nivel
+                        celdas[j - 1][i].setValor(" ")                      # Borra el valor anterior
+                        celdas[j][i].setLock(True)                          # Actualiza el bloqueo
+                        score += 1                                          # Suma uno cada vez que fusiona
     return celdas, score
 
 
@@ -274,18 +290,20 @@ def derecha(tam, celdas, score):
 
 def izquierda(tam, celdas, score):
 
-    print("\n--- Izquierda ---")
+    print("\n--- IZQUIERDA ---")
     for k in range(tam):
         for i in range(tam):
             for j in range(0, tam - 1, 1):
-                if celdas[j][i].getValor() == " ":
-                    if celdas[j + 1][i].getValor() != "*":
-                        celdas[j][i].setValor(celdas[j + 1][i].getValor())  # mueve lo que hay en tam-1 a tam
-                        celdas[j + 1][i].setValor(" ")
+                if celdas[j][i].getValor() == " ":                          # Comprueba si es espacio
+                    if celdas[j + 1][i].getValor() != "*":                  # Comprueba si no es obstaculo
+                        celdas[j][i].setValor(celdas[j + 1][i].getValor())  # Mueve lo que hay en tam-1 a tam
+                        celdas[j + 1][i].setValor(" ")                      # Borra el valor anterior
                 elif celdas[j][i].getValor() == celdas[j + 1][i].getValor() and celdas[j][i].getValor() != "*":
-                    celdas[j][i].setValor(celdas[j][i].getValor() + 1)
-                    celdas[j + 1][i].setValor(" ")
-                    score += 1
+                    if not celdas[j + 1][i].getLock():                      # Comprueba si esta bloqueada
+                        celdas[j][i].setValor(celdas[j][i].getValor() + 1)  # Fusiona dos celdas del mismo nivel
+                        celdas[j + 1][i].setValor(" ")                      # Borra el valor anterior
+                        celdas[j][i].setLock(True)                          # Actualiza el bloqueo
+                        score += 1                                          # Suma uno cada vez que fusiona
     return celdas, score
 
 
@@ -294,18 +312,20 @@ def izquierda(tam, celdas, score):
 
 def subir(tam, celdas, score):
 
-    print("\n--- Subir ---")
+    print("\n--- SUBIR ---")
     for k in range(tam):
         for i in range(0, tam - 1, 1):
             for j in range(tam):
-                if celdas[j][i].getValor() == " ":
-                    if celdas[j][i + 1].getValor() != "*":
+                if celdas[j][i].getValor() == " ":                          # Comprueba si es espacio
+                    if celdas[j][i + 1].getValor() != "*":                  # Comprueba si no es obstaculo
                         celdas[j][i].setValor(celdas[j][i + 1].getValor())  # Mueve lo que hay en tam-1 a tam
-                        celdas[j][i + 1].setValor(" ")
+                        celdas[j][i + 1].setValor(" ")                      # Borra el valor anterior
                 elif celdas[j][i].getValor() == celdas[j][i + 1].getValor() and celdas[j][i].getValor() != "*":
-                    celdas[j][i].setValor(celdas[j][i].getValor() + 1)
-                    celdas[j][i + 1].setValor(" ")
-                    score += 1
+                    if not celdas[j][i + 1].getLock():                      # Comprueba si esta bloqueada
+                        celdas[j][i].setValor(celdas[j][i].getValor() + 1)  # Fusiona dos celdas del mismo nivel
+                        celdas[j][i + 1].setValor(" ")                      # Borra el valor anterior
+                        celdas[j][i].setLock(True)                          # Actualiza el bloqueo
+                        score += 1                                          # Suma uno cada vez que fusiona
     return celdas, score
 
 
@@ -314,18 +334,20 @@ def subir(tam, celdas, score):
 
 def bajar(tam, celdas, score):
 
-    print("\n--- Bajar ---")
+    print("\n--- BAJAR ---")
     for k in range(tam):
         for i in range(tam - 1, 0, -1):
             for j in range(tam):
-                if celdas[j][i].getValor() == " ":
-                    if celdas[j][i - 1].getValor() != "*":
-                        celdas[j][i].setValor(celdas[j][i - 1].getValor())  # mueve lo que hay en tam-1 a tam
+                if celdas[j][i].getValor() == " ":                          # Comprueba si es espacio
+                    if celdas[j][i - 1].getValor() != "*":                  # Comprueba si no es obstaculo
+                        celdas[j][i].setValor(celdas[j][i - 1].getValor())  # Mueve lo que hay en tam-1 a tam
                         celdas[j][i - 1].setValor(" ")
                 elif celdas[j][i].getValor() == celdas[j][i - 1].getValor() and celdas[j][i].getValor() != "*":
-                    celdas[j][i].setValor(celdas[j][i].getValor() + 1)
-                    celdas[j][i - 1].setValor(" ")
-                    score += 1
+                    if not celdas[j][i - 1].getLock():                      # Comprueba si esta bloqueada
+                        celdas[j][i].setValor(celdas[j][i].getValor() + 1)  # Fusiona dos celdas del mismo nivel
+                        celdas[j][i - 1].setValor(" ")
+                        celdas[j][i].setLock(True)                          # Actualiza el bloqueo
+                        score += 1                                          # Suma uno cada vez que fusiona
     return celdas, score
 
 
@@ -339,7 +361,7 @@ def play(tam, celdas, moves, score, modo):
         imprimirTab(tam, modo, celdas)                                  # Imprime el tablero
 
         print("\n\nMOVIMIENTOS:", moves, "| PUNTUACIÓN:", score)
-        letra = input("[S]ubir, [B]ajar, [I]zda, [D]cha | [M]odo, [G]uardar, [F]in: ")
+        letra = input("[S]ubir, [B]ajar, [I]zda, [D]cha | [M]odo, [G]uardar, [F]in: \n")
         if letra == "M":                                                # Enseña los modos a los que cambiar
             print("\nMODOS DE VISUALIZACIÓN: \n")
             print("1.Alfabético\n2.Numérico\n3.1024\n4.2048")
@@ -351,12 +373,12 @@ def play(tam, celdas, moves, score, modo):
                     celdas[j][i].setMode(modo)                          # Actualiza el modo de todas las celdas
 
         elif letra == "G":                                              # Guarda la partida
-            save(tam, celdas)                                           # Genera un fichero con la partida guardada
-            menu()                                                      # Vuelve al menu principal del juego
-            break
+            save(tam, celdas)                                           # Genera un fichero con la partida
+            return
+
         elif letra == "F":                                              # Vuelve al menu del principal del juego
-            menu()
-            break
+            return
+
         elif letra == "S":                                              # Mueve hacia arriba
             moves += 1                                                  # Suma 1 a los movimientos
             celdas, score = subir(tam, celdas, score)                   # Actualiza el tablero
@@ -378,11 +400,8 @@ def play(tam, celdas, moves, score, modo):
             addCelda(tam, celdas)                                       # Añade una celda random
 
 
-modo = 1
-opcion = menu()                                                 # Llamo a menu() porque necesito la variable select
-
 while True:                                                     # Bucle principal del juego
-
+    opcion = menu()                                             # Llamo a menu() porque necesito la variable select
     if opcion == 1:                                             # Si selecciona opcion 1
         modo = 1
         tam = int(input("Tamaño del tablero: "))                # Pide dimensiones del tablero
