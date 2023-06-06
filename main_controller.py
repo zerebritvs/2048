@@ -95,23 +95,6 @@ class Celda:                                                # Creamos el objeto 
             return self.__modoValor
 
 
-'''Te envia al menu principal'''
-
-
-def menu():
-
-    print("--------------------  CLON-3  --------------------\n- Practica de Paradigmas de Programacion 2019-20 ",
-          end="")
-    print("-\n--------------------------------------------------")
-    print("\n1. CREAR NUEVO TABLERO\n2. LEER TABLERO DE FICHERO\n3. SALIR")
-
-    select = int(input("\nSelecione una opcion: "))
-    if select == 3:                                 # Si el usuario selecciona 3
-        sys.exit(0)                                 # Finaliza el programa
-
-    return select
-
-
 '''Imprime en consola el tablero vacio'''
 
 
@@ -142,8 +125,8 @@ def imprimirTab(tam, modo, celdas):
 '''Guarda el tablero en un archivo .tab'''
 
 
-def save(tam, celdas):
-    fichero = input("Nombre del fichero: ")
+def save(tam, celdas, path, moves, score):
+    fichero = path
     f = open(fichero, "w")                                  # Crea y abre el archivo en modo escritura
     f.write(str(moves) + "\n" + str(score))                 # Copia los movimientos y la puntuación
 
@@ -162,16 +145,14 @@ def save(tam, celdas):
 '''Carga el tablero de un archivo .tab'''
 
 
-def load():
+def load(path):
 
-    fichero = input("Nombre del fichero: ")                         # Pide el nombre del fichero
+    fichero = path                       # Pide el nombre del fichero
     f = open(fichero, "r")                                          # Abre el fichero en modo lectura
     moves = f.readline()                                            # Lee los movimientos del fichero
     score = f.readline()                                            # Lee la puntuación del fichero
     tam = len(f.readline()) - 1                                     # Lee el tamaño del tablero
     celdas = [[Celda() for i in range(tam)] for j in range(tam)]    # Crea la lista celdas
-    historial = [celdas]
-    scorejugada = 0
     f.seek(len(moves)+len(score)+2)                                 # Coloca el puntero en el tablero
     dic = {"A": 1, "B": 2, "C": 3, "D": 4, "E": 5, "F": 6, "G": 7, "H": 8, "I": 9, "J": 10, "K": 11}
 
@@ -188,16 +169,15 @@ def load():
                 celdas[j][i].setValor(dic[linea[j]])                # Coloca el bloque que haya en el fichero
 
     f.close()                                                       # Cerramos el flujo de datos
-    return celdas, int(moves), int(score), int(tam), historial, scorejugada
+    return celdas, int(moves), int(score), int(tam)
 
 
 '''Añade un bloque nuevo de distinto nivel(1 o 2) cada vez que hay movimiento'''
 
 
-def addCelda(tam, celdas, historial):
+def addCelda(tam, celdas):
 
     prob = random.choices([1, 2], [0.75, 0.25])             # Probabilidad del 75% de nivel 1 y 25% de nivel 2
-    historial.append(celdas)
 
     while True:
         randIntX = randInt(tam)                             # Genera una coordenada x random
@@ -211,7 +191,7 @@ def addCelda(tam, celdas, historial):
         for j in range(tam):
             celdas[j][i].setLock(False)
 
-    return celdas, historial
+    return celdas
 
 
 '''Genera un int random generico'''
@@ -223,31 +203,13 @@ def randInt(max):
     return rand
 
 
-'''Comprueba si la partida a finalizado'''
-
-
-def fin(tam, celdas):
-    maximo = tam * tam                          # Numero maximo de celdas
-    contmax = 0
-
-    for i in range(tam):
-        for j in range(tam):
-            if celdas[j][i].getValor() != " ":  # Comprueba si todas las celdas están llenas
-                contmax += 1
-
-    if contmax == maximo:                       # Si las celdas estan llenas la partida finaliza
-        imprimirTab(tam, modo, celdas)          # Imprime el tablero lleno
-        print("\n\n---  FIN DEL JUEGO ---\n")
-        menu()                                  # Vuelve al menu principal
-
-
 '''Inicializamos las celdas del tablero'''
 
 
 def initCelda(tam, obs):
 
     celdas = [[Celda() for i in range(tam)] for j in range(tam)]    # Crea la lista celdas
-    historial = [celdas]
+
     cont = 0
     for i in range(obs):                                            # Creamos los obstaculos
 
@@ -260,17 +222,15 @@ def initCelda(tam, obs):
                 cont += 1
 
     for i in range(2):                                              # Genera dos bloques random en celdas vacias
-        addCelda(tam, celdas, historial)
+        addCelda(tam, celdas)
 
-    return celdas, historial
+    return celdas
 
 
 '''Mueve hacia la derecha'''
 
 
 def derecha(tam, celdas, score):
-
-    scorejugada = 0
 
     print("\n--- DERECHA ---")
 
@@ -287,17 +247,13 @@ def derecha(tam, celdas, score):
                         celdas[j - 1][i].setValor(" ")                      # Borra el valor anterior
                         celdas[j][i].setLock(True)                          # Actualiza el bloqueo
                         score += 1                                          # Suma uno cada vez que fusiona
-                        scorejugada += 1
-
-    return celdas, score, scorejugada
+    return celdas, score
 
 
 '''Mueve a la izquierda'''
 
 
 def izquierda(tam, celdas, score):
-
-    scorejugada = 0
 
     print("\n--- IZQUIERDA ---")
     for k in range(tam):
@@ -313,17 +269,13 @@ def izquierda(tam, celdas, score):
                         celdas[j + 1][i].setValor(" ")                      # Borra el valor anterior
                         celdas[j][i].setLock(True)                          # Actualiza el bloqueo
                         score += 1                                          # Suma uno cada vez que fusiona
-                        scorejugada += 1
-
-    return celdas, score, scorejugada
+    return celdas, score
 
 
 '''Mueve hacia arriba'''
 
 
 def subir(tam, celdas, score):
-
-    scorejugada = 0
 
     print("\n--- SUBIR ---")
     for k in range(tam):
@@ -339,17 +291,13 @@ def subir(tam, celdas, score):
                         celdas[j][i + 1].setValor(" ")                      # Borra el valor anterior
                         celdas[j][i].setLock(True)                          # Actualiza el bloqueo
                         score += 1                                          # Suma uno cada vez que fusiona
-                        scorejugada += 1
-
-    return celdas, score, scorejugada
+    return celdas, score
 
 
 '''Mueve hacia abajo'''
 
 
 def bajar(tam, celdas, score):
-
-    scorejugada = 0
 
     print("\n--- BAJAR ---")
     for k in range(tam):
@@ -365,96 +313,12 @@ def bajar(tam, celdas, score):
                         celdas[j][i - 1].setValor(" ")
                         celdas[j][i].setLock(True)                          # Actualiza el bloqueo
                         score += 1                                          # Suma uno cada vez que fusiona
-                        scorejugada += 1
-
-    return celdas, score, scorejugada
+    return celdas, score
 
 
-'''Vuelve hacia atras'''
+def cambiar_modo(modo, celdas):
+    for i in range(len(celdas)):
+        for j in range(len(celdas)):
+            celdas[j][i].setMode(modo)
+    return celdas
 
-def atras(score, moves, historial, scorejugada):
-
-    historial.pop(moves)                        # Quita el ultimo elemento de historial
-    celdas = historial[moves-1]                 # Iguala celdas a la lista de listas anterior
-
-    if moves > 0:
-        moves -= 1
-    else:
-        moves = 0
-
-    if score > 0:
-        score -= scorejugada
-    else:
-        score = 0
-
-    return celdas, score, moves, historial
-
-
-'''Entra en el bucle del juego'''
-
-def play(tam, celdas, moves, score, modo, historial):
-
-    while True:                                                         # Acaba si el usuario pulsa [F]in o [G]uardar
-
-        fin(tam, celdas)                                                # Comprueba la partida ha finalizado
-        imprimirTab(tam, modo, celdas)                                  # Imprime el tablero
-
-        print("\n\nMOVIMIENTOS:", moves, "| PUNTUACIÓN:", score)
-        letra = input("[S]ubir, [B]ajar, [I]zda, [D]cha, [A]tras | [M]odo, [G]uardar, [F]in: \n")
-        if letra == "M":                                                # Enseña los modos a los que cambiar
-            print("\nMODOS DE VISUALIZACIÓN: \n")
-            print("1.Alfabético\n2.Numérico\n3.1024\n4.2048")
-
-            modo = int(input("\nEscoja modo: "))                        # Pide el modo al usuario
-
-            for i in range(tam):
-                for j in range(tam):
-                    celdas[j][i].setMode(modo)                          # Actualiza el modo de todas las celdas
-
-        elif letra == "G":                                              # Guarda la partida
-            save(tam, celdas)                                           # Genera un fichero con la partida
-            return
-
-        elif letra == "F":                                              # Vuelve al menu del principal del juego
-            return
-
-        elif letra == "S":                                              # Mueve hacia arriba
-            moves += 1                                                  # Suma 1 a los movimientos
-            celdas, score, scorejugada = subir(tam, celdas, score)      # Actualiza el tablero
-            addCelda(tam, celdas, historial)                            # Añade una celda random
-
-        elif letra == "B":                                              # Mueve hacia abajo
-            moves += 1                                                  # Suma 1 a los movimientos
-            celdas, score, scorejugada = bajar(tam, celdas, score)      # Actualiza el tablero
-            addCelda(tam, celdas, historial)                            # Añade una celda random
-
-        elif letra == "I":                                              # Mueve hacia la izquierda
-            moves += 1                                                  # Suma 1 a los movimientos
-            celdas, score, scorejugada = izquierda(tam, celdas, score)  # Actualiza el tablero
-            addCelda(tam, celdas, historial)                            # Añade una celda random
-
-        elif letra == "D":                                              # Mueve hacia la derecha
-            moves += 1                                                  # Suma 1 a los movimientos
-            celdas, score, scorejugada = derecha(tam, celdas, score)    # Actualiza el tablero
-            addCelda(tam, celdas, historial)                            # Añade una celda random
-
-        elif letra == "A":
-            celdas, score, moves, historial = atras(score, moves, historial, scorejugada)
-
-
-# while True:                                                     # Bucle principal del juego
-#
-#     opcion = menu()                                             # Llamo a menu() porque necesito la variable select
-#     if opcion == 1:                                             # Si selecciona opcion 1
-#         modo = 1
-#         tam = int(input("Tamaño del tablero: "))                # Pide dimensiones del tablero
-#         obs = int(input("Numero de obstaculos: "))              # Pide el numero de obstaculos
-#         celdas, historial = initCelda(tam, obs)                 # Inicializa el tablero
-#         moves = 0                                               # Inicializa el movimientos
-#         score = 0                                               # Inicializa la puntacion
-#         play(tam, celdas, moves, score, modo, historial)
-#
-#     elif opcion == 2:                                           # Carga una partida guardada
-#         celdas, moves, score, tam, historial, scorejugada = load()
-#         modo = 1
-#         play(tam, celdas, moves, score, modo, historial)        # Comienza a jugar
